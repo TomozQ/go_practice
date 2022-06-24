@@ -4,27 +4,23 @@ import (
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/widget"
 	"fyne.io/fyne/v2/container"
+	"strconv"
 )
 
 func main(){
 	a := app.New()
 	w := a.NewWindow("Hello")
 	l := widget.NewLabel("Hello Fyne!")
-	r := widget.NewRadioGroup(
-		[]string{"One", "Two", "Three"},
-		func(s string){
-			if s == "" {
-				l.SetText("not selected")
-			}else{
-				l.SetText("selected: " + s)
-			}
+	s := widget.NewSlider(0.0, 100.)
+	b := widget.NewButton(
+		"Check",
+		func(){
+			l.SetText("value: " + strconv.Itoa(int(s.Value)))
 		},
 	)
-	// チェック状態を変更
-	r.SetSelected("One")
 	w.SetContent(
 		container.NewVBox(
-			l, r,
+			l, s, b,
 		),
 	)
 
