@@ -10,18 +10,21 @@ func main(){
 	a := app.New()
 	w := a.NewWindow("Hello")
 	l := widget.NewLabel("Hello Fyne!")
-	c := widget.NewCheck("Check!", func(f bool){	//チェックが変更された際に実行される変数
-		if f {
-			l.SetText("Checked!")
-		}else {
-			l.SetText("Not Checked")
-		}
-	})
+	r := widget.NewRadioGroup(
+		[]string{"One", "Two", "Three"},
+		func(s string){
+			if s == "" {
+				l.SetText("not selected")
+			}else{
+				l.SetText("selected: " + s)
+			}
+		},
+	)
 	// チェック状態を変更
-	c.SetChecked(true)
+	r.SetSelected("One")
 	w.SetContent(
 		container.NewVBox(
-			l, c,
+			l, r,
 		),
 	)
 
