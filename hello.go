@@ -1,28 +1,38 @@
 package main
 
 import (
-	"io/ioutil"
+	"bufio"
 	"os"
 	"fmt"
 )
 
-// OpenFie
-// 変数 := os.OpenFile(ファイルパス, フラグ, <FileMode>)
-// panic( <<error>> ) -> プログラムを強制終了する
-// defer ...実行する処理... -> プログラムを終了する際、最後に必ず実行する処理
+// 変数 := bufio.NewReaderSize( <<Reader>>, int値 )
+// NewReaderSize...データを保管するバッファを持ったReaderを作成
+// 第一引数...Reader（この場合はFile） 第二引数...バッファサイズをint型で指定
+
+// 改行までデータを読み込む
+// 変数1, 変数2, 変数3 := <<Reader>>.ReadLine()
+// 戻り値...変数1 -> 読み込んだテキストがbyte配列で返される, 変数2 -> バッファにテキストを格納しきれない場合にはtrue, 変数3 -> error 
+
+// 区切り文字を指定して読み込む
+// 変数1, 変数2 := <<Reader>>.ReadString(byte値)
+// 戻り値...変数1 -> 読み込んだテキストがstringで返される。変数2 -> error
 
 func main(){
 	// 値読み込み関数
 	rt := func(f *os.File){ // f *os.FileにOpenFileで開いたファイルの構造体が渡される
-		// 読み取り値をsに格納する
-		s, er := ioutil.ReadAll(f) // ReadAllで全てをまとめて取り出す。戻り値はbyte配列とerror
-
-		// エラーがあった場合にはエラーを出力してファイルを閉じる
-		if er != nil {
-			panic(er)
+		//バッファサイズ4096
+		r := bufio.NewReaderSize(f, 4096)
+		// 1からスタートし無限ループ
+		for i := 1; true; i ++ {
+			s, _, er := r.ReadLine() // ReadLineでは最後まで読み込み終わった後で更にReadLineされるとEOF(End Of File)というerrorが発生する。
+			// ReadLineのEOFエラーでループを抜ける
+			if er != nil {
+				break
+			}
+			// iを増やしてナンバリングして出力
+			fmt.Println(i, ":", string(s))
 		}
-
-		fmt.Println(string(s))
 	}
 
 	// 書き出すファイル名を指定
