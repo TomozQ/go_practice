@@ -44,19 +44,17 @@ func main(){
 			panic(er)
 		}
 		
-		rs, er := con.Query(query, n) // queryの ? に n がはめ込まれる
+		rs := con.QueryRow(query, n) // queryの ? に n がはめ込まれる
 		if er != nil {
 			panic(er)
 		}
 		
-		for rs.Next(){
-			var md Mydata
-			er := rs.Scan(&md.ID, &md.Name, &md.Mail, &md.Age)
-			if er != nil {
-				panic(er)
-			}
-			fmt.Println(md.Str())
+		var md Mydata
+		er2 := rs.Scan(&md.ID, &md.Name, &md.Mail, &md.Age)
+		if er2 != nil {
+			panic(er2)
 		}
+		fmt.Println(md.Str())
 	}
 	fmt.Println("***end***")
 }
