@@ -6,15 +6,10 @@ import (
 	"database/sql"
 	// importされているパッケージと依存関係にあるパッケージを指定するときには_をつけて記述する。パッケージ内の関数を呼び出して使用するわけではないため、_なしで記述すると構文チェックが実行され使用していないパッケージと判断されてしまう。
 	_"github.com/mattn/go-sqlite3" // github.com/mattn/go-sqlite3パッケージには、database/sqlを使う際にドライバとして使用されるプログラムが用意されている。このパッケージにある関数や構造体を直接利用するわけではなく、database/sqlにある機能を使う際に、依存関係にあるgithub.com/mattn/go-sqlite3パッケージの機能が呼び出される。
+	"hello"
 )
 
-// sql.Open
-// 変数1, 変数2 := sql.Open( ドライバ名, データベース名 )
-// 引数はどちらもstring
-// DBにアクセスし、「DB」構造体を返す（正確にはそのポインタ）
-
-// DBのclose
-// defer <<*DB>>.Close() DBへの接続を開放する
+var query string = "select * from mydata where id = ?" // ? -> プレースホルダ...あとから値をはめ込む場所を指定
 
 // Mydata is json structure
 type Mydata struct {
@@ -38,26 +33,30 @@ func main(){
 	}
 	defer con.Close()
 
-	// queryをstringで用意
-	q := "select * from mydata"
-	// 変数1, 変数2 := <<DB>>.Query( sqlクエリ )
-	rs, er := con.Query(q) // rsに「Rows」という構造体が返却される
-	if er != nil {
-		panic(er)
-	}
-
-	// Rows
-	// カーソルと呼ばれる機能を持っている。カーソル...現在設定されているレコードを示す情報 初期値は取得したレコードの冒頭に設定されている。
-	// カーソルが指定されているレコードからデータを取り出す機能を持っている。
-	
-	// 順番にカーソルを移動させレコードを取得する
-	for rs.Next() {	// <<Rows>>.Next()...カーソルを次のレコードに移動する
-		var md Mydata
-		// 現在のカーソルが当たっているレコードから値を取り出す。
-		er := rs.Scan(&md.ID, &md.Name, &md.Mail, &md.Age) // 引数にはあらかじめ用意しておいた変数のポインタを指定する。レコードから各カラムの値を取り出し、それを引数に用意されている変数に代入する。用意する引数はレコードの値の数だけ揃える必要がある。数が足りないとエラーになる。
+	for true {
+		s := hello.Input("id")
+		if s == "" {
+			break
+		}
+		
+		n, er := strconv.Atoi(s)
 		if er != nil {
 			panic(er)
 		}
-		fmt.Println(md.Str())
+		
+		rs, er := con.Query(query, n) // queryの ? に n がはめ込まれる
+		if er != nil {
+			panic(er)
+		}
+		
+		for rs.Next(){
+			var md Mydata
+			er := rs.Scan(&md.ID, &md.Name, &md.Mail, &md.Age)
+			if er != nil {
+				panic(er)
+			}
+			fmt.Println(md.Str())
+		}
 	}
+	fmt.Println("***end***")
 }
