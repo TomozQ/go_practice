@@ -8,6 +8,8 @@ import (
 
 // OpenFie
 // 変数 := os.OpenFile(ファイルパス, フラグ, <FileMode>)
+// panic( <<error>> )
+// defer ...実行する処理...
 
 func main(){
 	// 値書き出し関数
@@ -17,9 +19,7 @@ func main(){
 
 		// エラーがあった場合にはエラーを出力してファイルを閉じる
 		if er != nil {
-			fmt.Println(er)
-			f.Close()
-			return
+			panic(er)
 		}
 	}
 
@@ -32,9 +32,11 @@ func main(){
 	f, er := os.OpenFile(fn, os.O_APPEND|os.O_CREATE|os.O_WRONLY, os.ModePerm)
 	// エラーがあった場合にはエラーを出力してファイルを閉じる
 	if er != nil {
-		fmt.Println(er)
-		return
+		panic(er)
 	}
+
+	// defer close
+	defer f.Close()
 
 	fmt.Println("***start***")
 	// wt関数にOpenFileで開いたファイルの構造体とstringを渡す
