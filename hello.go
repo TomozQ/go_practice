@@ -1,32 +1,46 @@
+// 外部のwebサイトにアクセスする
+
 package main
 
 import (
-	"io/ioutil"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+
 )
 
-// 変数1, 変数2 := os.Stat(パス)
-// 戻り値...変数1 -> FileInfo, 変数2 -> error
+// 変数1, 変数2 := http.Get( アドレス )
+// 引数...webサイトのアドレス(URL)をstringで渡す。
+// 戻り値...変数1 -> 指定アドレスにGETアクセスし取得した結果, 変数2 -> error
+// ※POSTアクセスする場合にはhttp.Post()もある。
+// 変数1に返される値はResponse構造体
 
-// Fileから直接FileInfoを取り出したい場合
-// 変数1, 変数2 := <<Fule>>.Stat()
-// 戻り値...取得できた場合 -> 変数1にFileInfo, 取得できなかった場合 -> 変数2にFileInfo
+// ReadCloser
+// 変数1, 変数2 := ioutil.ReadAll( <<ReadCloser>> )
+// Response構造体のBodyを引数に指定して全テキストをbyte配列で取得する。
 
-// ディレクトリ内にあるファイルを調べる
-// 変数 := ioutil.ReadDir(パス)
-// 戻り値...直下にあるファイル/フォルダ類のFileInfo配列が得られる。
+// ReadCloserの開放
+// <<ReadCloser>>.Close()
 
+
+// WEBサイトのコンテンツを取得する
 func main(){
-	// プログラムがある場所のパスを指定
-	fs, er := ioutil.ReadDir(".")
+	p := "https://golang.org"
+	// 指定のアドレスにアクセスする
+	re, er := http.Get(p)
 
 	if er != nil {
 		panic(er)
 	}
 
-	// fsに対してループを回す
-	for _, f := range(fs) {
-		// ファイル名とbyte数を出力
-		fmt.Println(f.Name(), "(", f.Size(), ")")
+	defer re.Body.Close()
+
+	// リクエストからコンテンツのテキストを取り出す
+	s, er := ioutil.ReadAll(re.Body)
+
+	if er != nil {
+		panic(er)
 	}
+
+	fmt.Println(string(s))
 }
