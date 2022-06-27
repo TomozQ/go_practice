@@ -9,8 +9,6 @@ import (
 	"hello"
 )
 
-var query string = "select * from mydata where name like ? or mail like ?" // ? -> プレースホルダ...あとから値をはめ込む場所を指定
-
 // Mydata is json structure
 type Mydata struct {
 	ID int
@@ -33,26 +31,42 @@ func main(){
 	}
 	defer con.Close()
 
-	for true {
-		s := hello.Input("find")
-		if s == "" {
-			break
-		}
-		
-		rs, er := con.Query(query, "%"+s+"%", "%"+s+"%") // queryの ? に n がはめ込まれる
-		if er != nil {
-			panic(er)
-		}
+	nm := hello.Input("name")
+	ml := hello.Input("mail")
+	age := hello.Input("age")
+	ag, _ := strconv.Atoi(age)
+	
+	qry := "insert into mydata (name, mail, age) values (?, ?, ?)"
+	con.Exec(qry, nm, ml, ag)
+	showRecord(con)
+}
 
-		for rs.Next() {
-			var md Mydata
-			er2 := rs.Scan(&md.ID, &md.Name, &md.Mail, &md.Age)
-			if er2 != nil {
-				panic(er2)
-			}
-			fmt.Println(md.Str())
-		}
-		
+// Print all record
+func showRecord(con *sql.DB){
+	qry := "select * from mydata"
+	rs, _ := con.Query(qry)
+	for rs.Next(){
+		fmt.Println(mydatafmRws(rs).Str())
 	}
-	fmt.Println("***end***")
+}
+
+// get Mydata from Rows
+func mydatafmRws(rs *sql.Rows) *Mydata {
+	var md Mydata
+	er := rs.Scan(&md.ID, &md.Name, &md.Mail, &md.Age )
+	if er != nil {
+		panic(er)
+	}
+
+	return &md
+}
+
+func mydatafmRw(rs *sql.Rows) *Mydata {
+	var md Mydata
+	er := rs.Scan(&md.ID, &md.Name, &md.Mail, &md.Age)
+	if er != nil {
+		panic(er)
+	}
+	
+	return &md
 }
