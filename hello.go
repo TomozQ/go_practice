@@ -9,7 +9,7 @@ import (
 	"hello"
 )
 
-var query string = "select * from mydata where name like ?" // ? -> プレースホルダ...あとから値をはめ込む場所を指定
+var query string = "select * from mydata where name like ? or mail like ?" // ? -> プレースホルダ...あとから値をはめ込む場所を指定
 
 // Mydata is json structure
 type Mydata struct {
@@ -39,7 +39,7 @@ func main(){
 			break
 		}
 		
-		rs, er := con.Query(query, "%"+s+"%") // queryの ? に n がはめ込まれる
+		rs, er := con.Query(query, "%"+s+"%", "%"+s+"%") // queryの ? に n がはめ込まれる
 		if er != nil {
 			panic(er)
 		}
