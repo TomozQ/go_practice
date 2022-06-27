@@ -9,7 +9,7 @@ import (
 	"hello"
 )
 
-var query string = "select * from mydata where id = ?" // ? -> プレースホルダ...あとから値をはめ込む場所を指定
+var query string = "select * from mydata where name like ?" // ? -> プレースホルダ...あとから値をはめ込む場所を指定
 
 // Mydata is json structure
 type Mydata struct {
@@ -34,27 +34,25 @@ func main(){
 	defer con.Close()
 
 	for true {
-		s := hello.Input("id")
+		s := hello.Input("find")
 		if s == "" {
 			break
 		}
 		
-		n, er := strconv.Atoi(s)
+		rs, er := con.Query(query, "%"+s+"%") // queryの ? に n がはめ込まれる
 		if er != nil {
 			panic(er)
 		}
-		
-		rs := con.QueryRow(query, n) // queryの ? に n がはめ込まれる
-		if er != nil {
-			panic(er)
+
+		for rs.Next() {
+			var md Mydata
+			er2 := rs.Scan(&md.ID, &md.Name, &md.Mail, &md.Age)
+			if er2 != nil {
+				panic(er2)
+			}
+			fmt.Println(md.Str())
 		}
 		
-		var md Mydata
-		er2 := rs.Scan(&md.ID, &md.Name, &md.Mail, &md.Age)
-		if er2 != nil {
-			panic(er2)
-		}
-		fmt.Println(md.Str())
 	}
 	fmt.Println("***end***")
 }
